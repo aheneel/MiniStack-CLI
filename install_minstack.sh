@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # install_minstack.sh - Установка MiniStack CLI из GitHub репозитория
-# Устанавливает файлы, запускает sudo ms stack install и удаляет /root/MiniStack-CLI
+# Устанавливает файлы, запускает sudo ms stack --install и удаляет /root/MiniStack-CLI
 # Версия 1.0.31
 
 set -e
@@ -133,8 +133,8 @@ sleep 1
 
 # Запуск установки стека
 echo -e "${BLUE}Запускаем установку LEMP-стека...${NC}"
-if ! sudo /usr/local/bin/ms stack install; then
-    echo -e "${RED}Ошибка: не удалось выполнить sudo ms stack install${NC}"
+if ! sudo /usr/local/bin/ms stack --install; then
+    echo -e "${RED}Ошибка: не удалось выполнить sudo ms stack --install${NC}"
     sudo rm -rf "$REPO_DIR"
     exit 1
 fi
