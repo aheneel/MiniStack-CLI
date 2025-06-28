@@ -8,6 +8,10 @@ bulk_create_sites() {
         SKIP_AVAILABILITY_CHECK=1
         shift
     fi
+    if [ $# -gt 0 ]; then
+        log_message "error" "Неверные аргументы для --bulk: $@. Используйте без флагов или --skip-availability-check"
+        exit 1
+    fi
     log_message "info" "Запускаем массовый деплой сайтов..." "start_operation"
     echo -e "${YELLOW}Введите домены (по одному на строку, без http:// или /, например: domain.com). Для завершения введите 'done':${NC}"
     declare -a INPUT_DOMAINS
@@ -56,7 +60,8 @@ bulk_create_sites() {
             log_message "info" "Выбрана версия PHP: $PHP_VERSION"
             break
         else
-            log_message "warning" "Неверный выбор PHP. Допустимые значения: 1-${#PHP_VERSIONS[@]}"
+            log_message "error" "Неверный выбор PHP. Допустимые значения: 1-${#PHP_VERSIONS[@]}"
+            exit 1
         fi
     done
 
@@ -71,7 +76,7 @@ bulk_create_sites() {
             1) SITE_TYPE="--html"; log_message "info" "Выбран тип сайта: $SITE_TYPE"; break ;;
             2) SITE_TYPE="--php"; log_message "info" "Выбран тип сайта: $SITE_TYPE"; break ;;
             3) SITE_TYPE="--wp"; log_message "info" "Выбран тип сайта: $SITE_TYPE"; break ;;
-            *) log_message "warning" "Неверный выбор типа сайта. Допустимые значения: 1-3" ;;
+            *) log_message "error" "Неверный выбор типа сайта. Допустимые значения: 1-3"; exit 1 ;;
         esac
     done
 
@@ -86,7 +91,7 @@ bulk_create_sites() {
             1) REDIRECT_MODE="yes-www"; log_message "info" "Выбрана настройка редиректа: $REDIRECT_MODE"; break ;;
             2) REDIRECT_MODE="no-www"; log_message "info" "Выбрана настройка редиректа: $REDIRECT_MODE"; break ;;
             3) REDIRECT_MODE="none"; log_message "info" "Выбрана настройка редиректа: $REDIRECT_MODE"; break ;;
-            *) log_message "warning" "Неверный выбор редиректа. Допустимые значения: 1-3" ;;
+            *) log_message "error" "Неверный выбор редиректа. Допустимые значения: 1-3"; exit 1 ;;
         esac
     done
 
@@ -101,7 +106,7 @@ bulk_create_sites() {
             1) SSL_ENABLED="yes"; SSL_TYPE="--letsencrypt"; log_message "info" "Выпуск SSL: $SSL_TYPE"; break ;;
             2) SSL_ENABLED="yes"; SSL_TYPE="--selfsigned"; log_message "info" "Выпуск SSL: $SSL_TYPE"; break ;;
             3) SSL_ENABLED="no"; SSL_TYPE=""; log_message "info" "Выпуск SSL: отключен"; break ;;
-            *) log_message "warning" "Неверный выбор для SSL. Допустимые значения: 1-3" ;;
+            *) log_message "error" "Неверный выбор для SSL. Допустимые значения: 1-3"; exit 1 ;;
         esac
     done
 
