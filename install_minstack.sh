@@ -51,11 +51,7 @@ fi
 # Директория для клонирования
 REPO_DIR="/root/MiniStack-CLI"
 
-# Очистка старых файлов
-echo -e "${BLUE}Очищаем старые файлы MiniStack CLI...${NC}"
-sudo rm -rf /usr/local/lib/minStack/* /usr/local/bin/ms 2>/dev/null
-
-# Удаляем старую папку репозитория, если существует
+# Удаляем старую папку, если существует
 if [ -d "$REPO_DIR" ]; then
     echo -e "${BLUE}Удаляем старую папку $REPO_DIR...${NC}"
     sudo rm -rf "$REPO_DIR"
@@ -70,15 +66,6 @@ FILES=("ms" "config.sh" "core.sh" "nginx_utils.sh" "stack_install.sh" "site_crea
 for file in "${FILES[@]}"; do
     if [ ! -f "$REPO_DIR/$file" ]; then
         echo -e "${RED}Ошибка: файл $file не найден в репозитории${NC}"
-        sudo rm -rf "$REPO_DIR"
-        exit 1
-    fi
-done
-
-# Проверка синтаксиса файлов
-for file in "${FILES[@]}"; do
-    if ! bash -n "$REPO_DIR/$file"; then
-        echo -e "${RED}Ошибка: синтаксическая ошибка в $file${NC}"
         sudo rm -rf "$REPO_DIR"
         exit 1
     fi
