@@ -3,6 +3,10 @@
 
 clean_headers() {
     clean_old_logs
+    if [ $# -gt 0 ]; then
+        log_message "error" "Неверные аргументы для --clean: $@. Используйте без флагов"
+        exit 1
+    fi
     log_message "info" "Настраиваем чистые HTTP-заголовки..." "start_operation"
     if ! grep -q "server_tokens off" /etc/nginx/nginx.conf; then
         sed -i '/http {/a\    server_tokens off;' /etc/nginx/nginx.conf
