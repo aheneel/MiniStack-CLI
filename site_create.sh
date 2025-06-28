@@ -7,12 +7,13 @@ create_site() {
     TYPE=$2
     PHP_VERSION=$DEFAULT_PHP
     REDIRECT_MODE="none"
+    SSL_TYPE=""
     SUCCESS_COUNT=0
     ERROR_COUNT=0
 
-    # Проверка корректности аргументов
+    # Проверка корректности домена и типа сайта
     if [ -z "$DOMAIN" ] || [ -z "$TYPE" ]; then
-        log_message "error" "Укажите домен и тип сайта, например: sudo ms site create example.com --html [--php74|--php80|--php81|--php82|--php83] [--yes-www|--no-www]"
+        log_message "error" "Укажите домен и тип сайта, например: sudo ms site create example.com --html [--php74|--php80|--php81|--php82|--php83] [--yes-www|--no-www] [--ssl-lets|--ssl-open]"
         exit 1
     fi
 
@@ -28,12 +29,8 @@ create_site() {
 
     # Парсинг дополнительных аргументов
     shift 2
-    VALID_FLAGS=("--php74" "--php80" "--php81" "--php82" "--php83" "--yes-www" "--no-www")
+    VALID_FLAGS=("--php74" "--php80" "--php81" "--php82" "--php83" "--yes-www" "--no-www" "--ssl-lets" "--ssl-open")
     for arg in "$@"; do
-        if [[ ! " ${VALID_FLAGS[*]} " =~ " $arg " ]]; then
-            log_message "error" "Неверный аргумент: $arg. Допустимые флаги: ${VALID_FLAGS[*]}"
-            exit 1
-        fi
         case "$arg" in
             --php74) PHP_VERSION="7.4" ;;
             --php80) PHP_VERSION="8.0" ;;
@@ -42,6 +39,9 @@ create_site() {
             --php83) PHP_VERSION="8.3" ;;
             --yes-www) REDIRECT_MODE="yes-www" ;;
             --no-www) REDIRECT_MODE="no-www" ;;
+            --ssl-lets) SSL_TYPE="--letsencrypt" ;;
+            --ssl-open) SSL_TYPE="--selfsigned" ;;
+            *) log_message "warning" "Неверный аргумент: $arg. Игнорируем." ;;
         esac
     done
 
@@ -246,6 +246,15 @@ create_site() {
 
     systemctl restart nginx
     check_service nginx
+
+    if [ -n "$SSL_TYPE" ]; then
+        if setup_ssl "$DOMAIN" "$SSL_TYPE"; then
+            log_message "success" "SSL ($SSL_TYPE) установлен для $ORIGINAL_DOMAIN"
+            sed -i "/Site: $ORIGINAL_DOMAIN/,/-------------------/{/SSL: .*/s//SSL: Enabled ($SSL_TYPE)/}" "$SITE_CREDENTIALS" 2>/dev/null
+        else
+            log_message "warning" "Не удалось установить SSL ($SSL_TYPE) для $ORIGINAL_DOMAIN"
+        fi
+    fi
 
     if curl -I "http://$DOMAIN" >/dev/null 2>&1; then
         log_message "success" "Сайт $ORIGINAL_DOMAIN успешно создан и доступен"
