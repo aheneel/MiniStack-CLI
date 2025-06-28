@@ -96,3 +96,48 @@ final_check_and_restart() {
     ERROR_COUNT=0
     log_message "info" "Проверка компонентов завершена" "end_operation" "Проверка компонентов завершена"
 }
+
+check_stack_installed() {
+    local all_installed=1
+    log_message "info" "Проверяем, установлен ли LEMP-стек..."
+    if ! dpkg -l nginx >/dev/null 2>&1; then
+        log_message "error" "Nginx не установлен"
+        all_installed=0
+    fi
+    if ! dpkg -l mariadb-server >/dev/null 2>&1; then
+        log_message "error" "MariaDB не установлен"
+        all_installed=0
+    fi
+    if ! dpkg -l certbot >/dev/null 2>&1; then
+        log_message "error" "Certbot не установлен"
+        all_installed=0
+    fi
+    if ! dpkg -l libidn2-0 >/dev/null 2>&1; then
+        log_message "error" "libidn2-0 не установлен"
+        all_installed=0
+    fi
+    if ! wp --version --allow-root >/dev/null 2>&1; then
+        log_message "error" "wp-cli не установлен"
+        all_installed=0
+    fi
+    for version in "${PHP_VERSIONS[@]}"; do
+        if ! php${version} --version >/dev/null 2>&1; then
+            log_message "error" "PHP $version не установлен"
+            all_installed=0
+        fi
+    done
+    if [ ! -f /etc/nginx/sites-available/default ]; then
+        log_message "error" "Дефолтный конфиг Nginx отсутствует"
+        all_installed=0
+    fi
+    if [ ! -f /etc/ssl/certs/nginx-selfsigned.crt ] || [ ! -f /etc/ssl/private/nginx-selfsigned.key ]; then
+        log_message "error" "Самоподписанный SSL-сертификат отсутствует"
+        all_installed=0
+    fi
+    if [ "$all_installed" -eq 1 ]; then
+        log_message "info" "LEMP-стек уже установлен"
+        return 0
+    else
+        return 1
+    fi
+}
