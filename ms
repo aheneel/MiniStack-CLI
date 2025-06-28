@@ -1,19 +1,31 @@
+#!/bin/bash
 # ms - Точка входа для MiniStack CLI
 # Версия 1.0.31
 
-source /usr/local/lib/minStack/config.sh
-source /usr/local/lib/minStack/core.sh
-source /usr/local/lib/minStack/nginx_utils.sh
-source /usr/local/lib/minStack/utils.sh
-source /usr/local/lib/minStack/stack_install.sh
-source /usr/local/lib/minStack/site_create.sh
-source /usr/local/lib/minStack/site_bulk_create.sh
-source /usr/local/lib/minStack/site_bulk_delete.sh
-source /usr/local/lib/minStack/site_delete.sh
-source /usr/local/lib/minStack/site_info.sh
-source /usr/local/lib/minStack/secure_ssl.sh
-source /usr/local/lib/minStack/clean_headers.sh
-source /usr/local/lib/minStack/show_info.sh
+# Проверка наличия файлов перед их подключением
+LIB_DIR="/usr/local/lib/minStack"
+FILES=("config.sh" "core.sh" "nginx_utils.sh" "utils.sh" "stack_install.sh" "site_create.sh" "site_bulk_create.sh" "site_bulk_delete.sh" "site_delete.sh" "site_info.sh" "secure_ssl.sh" "clean_headers.sh" "show_info.sh")
+
+for file in "${FILES[@]}"; do
+    if [ ! -f "$LIB_DIR/$file" ]; then
+        echo "ERROR: Файл $LIB_DIR/$file не найден"
+        exit 1
+    fi
+done
+
+. /usr/local/lib/minStack/config.sh
+. /usr/local/lib/minStack/core.sh
+. /usr/local/lib/minStack/nginx_utils.sh
+. /usr/local/lib/minStack/utils.sh
+. /usr/local/lib/minStack/stack_install.sh
+. /usr/local/lib/minStack/site_create.sh
+. /usr/local/lib/minStack/site_bulk_create.sh
+. /usr/local/lib/minStack/site_bulk_delete.sh
+. /usr/local/lib/minStack/site_delete.sh
+. /usr/local/lib/minStack/site_info.sh
+. /usr/local/lib/minStack/secure_ssl.sh
+. /usr/local/lib/minStack/clean_headers.sh
+. /usr/local/lib/minStack/show_info.sh
 
 # Парсинг команд
 case "$1" in
