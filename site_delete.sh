@@ -3,11 +3,15 @@
 
 delete_site() {
     clean_old_logs
-    DOMAIN=$1
+    DOMAIN="$1"
     SUCCESS_COUNT=0
     ERROR_COUNT=0
     if [ -z "$DOMAIN" ]; then
-        log_message "error" "Укажите домен, например: sudo ms site delete example.com"
+        log_message "error" "Укажите домен после --delete, например: sudo ms site --delete example.com"
+        exit 1
+    fi
+    if ! echo "$DOMAIN" | grep -qE '^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'; then
+        log_message "error" "Невалидный домен: $DOMAIN. Домен должен содержать точку"
         exit 1
     fi
     ORIGINAL_DOMAIN="$DOMAIN"
