@@ -23,50 +23,63 @@ fi
 # Проверка наличия git
 if ! command -v git >/dev/null 2>&1; then
     echo -e "${RED}Git не установлен. Устанавливаем...${NC}"
-    apt update
-    apt install -y git
+    sudo apt update
+    sudo apt install -y git
 fi
 
 # Проверка наличия curl
 if ! command -v curl >/dev/null 2>&1; then
     echo -e "${RED}Curl не установлен. Устанавливаем...${NC}"
-    apt update
-    apt install -y curl
+    sudo apt update
+    sudo apt install -y curl
 fi
 
 # Проверка наличия bash
 if ! command -v bash >/dev/null 2>&1; then
     echo -e "${RED}Bash не установлен. Устанавливаем...${NC}"
-    apt update
-    apt install -y bash
+    sudo apt update
+    sudo apt install -y bash
 fi
 
 # Установка dos2unix для конвертации CRLF в LF
 if ! command -v dos2unix >/dev/null 2>&1; then
     echo -e "${BLUE}Устанавливаем dos2unix...${NC}"
-    apt update
-    apt install -y dos2unix
+    sudo apt update
+    sudo apt install -y dos2unix
 fi
 
 # Директория для клонирования
 REPO_DIR="/root/MiniStack-CLI"
 
-# Удаляем старую папку, если существует
+# Очистка старых файлов
+echo -e "${BLUE}Очищаем старые файлы MiniStack CLI...${NC}"
+sudo rm -rf /usr/local/lib/minStack/* /usr/local/bin/ms 2>/dev/null
+
+# Удаляем старую папку репозитория, если существует
 if [ -d "$REPO_DIR" ]; then
     echo -e "${BLUE}Удаляем старую папку $REPO_DIR...${NC}"
-    rm -rf "$REPO_DIR"
+    sudo rm -rf "$REPO_DIR"
 fi
 
 # Клонирование репозитория
 echo -e "${BLUE}Клонируем репозиторий...${NC}"
-git clone https://github.com/aheneel/MiniStack-CLI.git "$REPO_DIR"
+sudo git clone https://github.com/aheneel/MiniStack-CLI.git "$REPO_DIR"
 
 # Проверка наличия файлов
 FILES=("ms" "config.sh" "core.sh" "nginx_utils.sh" "stack_install.sh" "site_create.sh" "site_bulk_create.sh" "site_bulk_delete.sh" "site_delete.sh" "site_info.sh" "secure_ssl.sh" "clean_headers.sh" "show_info.sh" "utils.sh")
 for file in "${FILES[@]}"; do
     if [ ! -f "$REPO_DIR/$file" ]; then
         echo -e "${RED}Ошибка: файл $file не найден в репозитории${NC}"
-        rm -rf "$REPO_DIR"
+        sudo rm -rf "$REPO_DIR"
+        exit 1
+    fi
+done
+
+# Проверка синтаксиса файлов
+for file in "${FILES[@]}"; do
+    if ! bash -n "$REPO_DIR/$file"; then
+        echo -e "${RED}Ошибка: синтаксическая ошибка в $file${NC}"
+        sudo rm -rf "$REPO_DIR"
         exit 1
     fi
 done
@@ -75,56 +88,56 @@ done
 echo -e "${BLUE}Конвертируем файлы в формат LF...${NC}"
 for file in "${FILES[@]}"; do
     if command -v dos2unix >/dev/null 2>&1; then
-        dos2unix "$REPO_DIR/$file" >/dev/null 2>&1
+        sudo dos2unix "$REPO_DIR/$file" >/dev/null 2>&1
     else
-        sed -i 's/\r$//' "$REPO_DIR/$file"
+        sudo sed -i 's/\r$//' "$REPO_DIR/$file"
     fi
 done
 
 # Создание директорий
 echo -e "${BLUE}Создаём директории...${NC}"
-mkdir -p /usr/local/lib/minStack
+sudo mkdir -p /usr/local/lib/minStack
 
 # Копирование файлов
 echo -e "${BLUE}Копируем файлы...${NC}"
-cp "$REPO_DIR/ms" /usr/local/bin/ms
-cp "$REPO_DIR/config.sh" /usr/local/lib/minStack/config.sh
-cp "$REPO_DIR/core.sh" /usr/local/lib/minStack/core.sh
-cp "$REPO_DIR/nginx_utils.sh" /usr/local/lib/minStack/nginx_utils.sh
-cp "$REPO_DIR/stack_install.sh" /usr/local/lib/minStack/stack_install.sh
-cp "$REPO_DIR/site_create.sh" /usr/local/lib/minStack/site_create.sh
-cp "$REPO_DIR/site_bulk_create.sh" /usr/local/lib/minStack/site_bulk_create.sh
-cp "$REPO_DIR/site_bulk_delete.sh" /usr/local/lib/minStack/site_bulk_delete.sh
-cp "$REPO_DIR/site_delete.sh" /usr/local/lib/minStack/site_delete.sh
-cp "$REPO_DIR/site_info.sh" /usr/local/lib/minStack/site_info.sh
-cp "$REPO_DIR/secure_ssl.sh" /usr/local/lib/minStack/secure_ssl.sh
-cp "$REPO_DIR/clean_headers.sh" /usr/local/lib/minStack/clean_headers.sh
-cp "$REPO_DIR/show_info.sh" /usr/local/lib/minStack/show_info.sh
-cp "$REPO_DIR/utils.sh" /usr/local/lib/minStack/utils.sh
+sudo cp "$REPO_DIR/ms" /usr/local/bin/ms
+sudo cp "$REPO_DIR/config.sh" /usr/local/lib/minStack/config.sh
+sudo cp "$REPO_DIR/core.sh" /usr/local/lib/minStack/core.sh
+sudo cp "$REPO_DIR/nginx_utils.sh" /usr/local/lib/minStack/nginx_utils.sh
+sudo cp "$REPO_DIR/stack_install.sh" /usr/local/lib/minStack/stack_install.sh
+sudo cp "$REPO_DIR/site_create.sh" /usr/local/lib/minStack/site_create.sh
+sudo cp "$REPO_DIR/site_bulk_create.sh" /usr/local/lib/minStack/site_bulk_create.sh
+sudo cp "$REPO_DIR/site_bulk_delete.sh" /usr/local/lib/minStack/site_bulk_delete.sh
+sudo cp "$REPO_DIR/site_delete.sh" /usr/local/lib/minStack/site_delete.sh
+sudo cp "$REPO_DIR/site_info.sh" /usr/local/lib/minStack/site_info.sh
+sudo cp "$REPO_DIR/secure_ssl.sh" /usr/local/lib/minStack/secure_ssl.sh
+sudo cp "$REPO_DIR/clean_headers.sh" /usr/local/lib/minStack/clean_headers.sh
+sudo cp "$REPO_DIR/show_info.sh" /usr/local/lib/minStack/show_info.sh
+sudo cp "$REPO_DIR/utils.sh" /usr/local/lib/minStack/utils.sh
 
 # Проверка, что ms скопировался
 if [ ! -f "/usr/local/bin/ms" ]; then
     echo -e "${RED}Ошибка: файл /usr/local/bin/ms не скопировался${NC}"
-    rm -rf "$REPO_DIR"
+    sudo rm -rf "$REPO_DIR"
     exit 1
 fi
 
 # Установка прав
 echo -e "${BLUE}Настраиваем права доступа...${NC}"
-chmod +x /usr/local/bin/ms
-chmod 644 /usr/local/lib/minStack/*.sh
+sudo chmod +x /usr/local/bin/ms
+sudo chmod 644 /usr/local/lib/minStack/*.sh
 
 # Проверка прав на ms
 if [ ! -x "/usr/local/bin/ms" ]; then
     echo -e "${RED}Ошибка: файл /usr/local/bin/ms не имеет прав на выполнение${NC}"
-    rm -rf "$REPO_DIR"
+    sudo rm -rf "$REPO_DIR"
     exit 1
 fi
 
 # Проверка синтаксиса главного файла
 if ! bash -n /usr/local/bin/ms; then
     echo -e "${RED}Ошибка: синтаксическая ошибка в /usr/local/bin/ms${NC}"
-    rm -rf "$REPO_DIR"
+    sudo rm -rf "$REPO_DIR"
     exit 1
 fi
 
@@ -133,14 +146,14 @@ sleep 1
 
 # Запуск установки стека
 echo -e "${BLUE}Запускаем установку LEMP-стека...${NC}"
-if ! /usr/local/bin/ms stack --install; then
+if ! sudo /usr/local/bin/ms stack --install; then
     echo -e "${RED}Ошибка: не удалось выполнить sudo ms stack --install${NC}"
-    rm -rf "$REPO_DIR"
+    sudo rm -rf "$REPO_DIR"
     exit 1
 fi
 
 # Удаление папки репозитория
 echo -e "${BLUE}Удаляем папку $REPO_DIR...${NC}"
-rm -rf "$REPO_DIR"
+sudo rm -rf "$REPO_DIR"
 
 echo -e "${GREEN}=== Установка MiniStack CLI завершена! ===${NC}"
