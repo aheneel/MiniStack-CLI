@@ -2,11 +2,16 @@
 # Версия 1.0.31
 
 install_stack() {
+    . /usr/local/lib/minStack/utils.sh
     clean_old_logs
     welcome
     log_message "info" "Проверяем установку LEMP-стека..." "start_operation"
     init_credentials
-    if check_stack_installed; then
+    if ! check_stack_installed; then
+        log_message "error" "Проверка LEMP-стека не удалась"
+        exit 1
+    fi
+    if [ $? -eq 0 ]; then
         SUCCESS_COUNT=1
         ERROR_COUNT=0
         log_message "info" "Установка стека завершена" "end_operation" "Установка стека завершена"
