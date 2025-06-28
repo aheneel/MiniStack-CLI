@@ -253,6 +253,7 @@ create_site() {
             sed -i "/Site: $ORIGINAL_DOMAIN/,/-------------------/{/SSL: .*/s//SSL: Enabled ($SSL_TYPE)/}" "$SITE_CREDENTIALS" 2>/dev/null
         else
             log_message "warning" "Не удалось установить SSL ($SSL_TYPE) для $ORIGINAL_DOMAIN"
+            ERROR_COUNT=1
         fi
     fi
 
