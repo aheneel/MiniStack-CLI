@@ -3,11 +3,6 @@
 
 bulk_create_sites() {
     clean_old_logs
-    SKIP_AVAILABILITY_CHECK=0
-    if [ "$1" = "--skip-availability-check" ]; then
-        SKIP_AVAILABILITY_CHECK=1
-        shift
-    fi
     log_message "info" "Запускаем массовый деплой сайтов..." "start_operation"
     echo -e "${YELLOW}Введите домены (по одному на строку, без http:// или /, например: domain.com). Для завершения введите 'done':${NC}"
     declare -a INPUT_DOMAINS
@@ -43,67 +38,59 @@ bulk_create_sites() {
         exit 1
     fi
 
-    while true; do
-        echo -e "${YELLOW}Выберите версию PHP:${NC}"
-        for i in "${!PHP_VERSIONS[@]}"; do
-            echo -e "${YELLOW}$((i+1)).${NC} PHP ${PHP_VERSIONS[i]}"
-        done
-        echo -e "${YELLOW}Введите номер (1-${#PHP_VERSIONS[@]}):${NC}"
-        read -r php_choice
-        if [[ "$php_choice" =~ ^[1-5]$ ]]; then
-            PHP_VERSION="${PHP_VERSIONS[$((php_choice-1))]}"
-            PHP_FLAG="--php${PHP_VERSION//./}"
-            log_message "info" "Выбрана версия PHP: $PHP_VERSION"
-            break
-        else
-            log_message "warning" "Неверный выбор PHP. Допустимые значения: 1-${#PHP_VERSIONS[@]}"
-        fi
+    echo -e "${YELLOW}Выберите версию PHP:${NC}"
+    for i in "${!PHP_VERSIONS[@]}"; do
+        echo -e "${YELLOW}$((i+1)).${NC} PHP ${PHP_VERSIONS[i]}"
     done
+    echo -e "${YELLOW}Введите номер (1-${#PHP_VERSIONS[@]}):${NC}"
+    read -r php_choice
+    if ! [[ "$php_choice" =~ ^[1-5]$ ]]; then
+        log_message "error" "Неверный выбор PHP. Допустимые значения: 1-${#PHP_VERSIONS[@]}"
+        exit 1
+    fi
+    PHP_VERSION="${PHP_VERSIONS[$((php_choice-1))]}"
+    PHP_FLAG="--php${PHP_VERSION//./}"
+    log_message "info" "Выбрана версия PHP: $PHP_VERSION"
 
-    while true; do
-        echo -e "${YELLOW}Выберите тип сайта:${NC}"
-        echo -e "${YELLOW}1.${NC} HTML"
-        echo -e "${YELLOW}2.${NC} PHP"
-        echo -e "${YELLOW}3.${NC} WordPress"
-        echo -e "${YELLOW}Введите номер (1-3):${NC}"
-        read -r type_choice
-        case $type_choice in
-            1) SITE_TYPE="--html"; log_message "info" "Выбран тип сайта: $SITE_TYPE"; break ;;
-            2) SITE_TYPE="--php"; log_message "info" "Выбран тип сайта: $SITE_TYPE"; break ;;
-            3) SITE_TYPE="--wp"; log_message "info" "Выбран тип сайта: $SITE_TYPE"; break ;;
-            *) log_message "warning" "Неверный выбор типа сайта. Допустимые значения: 1-3" ;;
-        esac
-    done
+    echo -e "${YELLOW}Выберите тип сайта:${NC}"
+    echo -e "${YELLOW}1.${NC} HTML"
+    echo -e "${YELLOW}2.${NC} PHP"
+    echo -e "${YELLOW}3.${NC} WordPress"
+    echo -e "${YELLOW}Введите номер (1-3):${NC}"
+    read -r type_choice
+    case $type_choice in
+        1) SITE_TYPE="--html" ;;
+        2) SITE_TYPE="--php" ;;
+        3) SITE_TYPE="--wp" ;;
+        *) log_message "error" "Неверный выбор типа сайта. Допустимые значения: 1-3"; exit 1 ;;
+    esac
+    log_message "info" "Выбран тип сайта: $SITE_TYPE"
 
-    while true; do
-        echo -e "${YELLOW}Выберите настройку редиректа:${NC}"
-        echo -e "${YELLOW}1.${NC} Редирект на www"
-        echo -e "${YELLOW}2.${NC} Редирект с www на домен"
-        echo -e "${YELLOW}3.${NC} Без редиректа (оба варианта)"
-        echo -e "${YELLOW}Введите номер (1-3):${NC}"
-        read -r redirect_choice
-        case $redirect_choice in
-            1) REDIRECT_MODE="yes-www"; log_message "info" "Выбрана настройка редиректа: $REDIRECT_MODE"; break ;;
-            2) REDIRECT_MODE="no-www"; log_message "info" "Выбрана настройка редиректа: $REDIRECT_MODE"; break ;;
-            3) REDIRECT_MODE="none"; log_message "info" "Выбрана настройка редиректа: $REDIRECT_MODE"; break ;;
-            *) log_message "warning" "Неверный выбор редиректа. Допустимые значения: 1-3" ;;
-        esac
-    done
+    echo -e "${YELLOW}Выберите настройку редиректа:${NC}"
+    echo -e "${YELLOW}1.${NC} Редирект на www"
+    echo -e "${YELLOW}2.${NC} Редирект с www на домен"
+    echo -e "${YELLOW}3.${NC} Без редиректа (оба варианта)"
+    echo -e "${YELLOW}Введите номер (1-3):${NC}"
+    read -r redirect_choice
+    case $redirect_choice in
+        1) REDIRECT_MODE="yes-www" ;;
+        2) REDIRECT_MODE="no-www" ;;
+        3) REDIRECT_MODE="none" ;;
+        *) log_message "error" "Неверный выбор редиректа. Допустимые значения: 1-3"; exit 1 ;;
+    esac
+    log_message "info" "Выбрана настройка редиректа: $REDIRECT_MODE"
 
-    while true; do
-        echo -e "${YELLOW}Выпускать SSL-сертификаты для сайтов?${NC}"
-        echo -e "${YELLOW}1.${NC} Let's Encrypt"
-        echo -e "${YELLOW}2.${NC} Самоподписанный (OpenSSL)"
-        echo -e "${YELLOW}3.${NC} Без SSL"
-        echo -e "${YELLOW}Введите номер (1-3):${NC}"
-        read -r ssl_choice
-        case $ssl_choice in
-            1) SSL_ENABLED="yes"; SSL_TYPE="--letsencrypt"; log_message "info" "Выпуск SSL: $SSL_TYPE"; break ;;
-            2) SSL_ENABLED="yes"; SSL_TYPE="--selfsigned"; log_message "info" "Выпуск SSL: $SSL_TYPE"; break ;;
-            3) SSL_ENABLED="no"; SSL_TYPE=""; log_message "info" "Выпуск SSL: отключен"; break ;;
-            *) log_message "warning" "Неверный выбор для SSL. Допустимые значения: 1-3" ;;
-        esac
-    done
+    echo -e "${YELLOW}Выпускать SSL-сертификаты для сайтов?${NC}"
+    echo -e "${YELLOW}1.${NC} Да"
+    echo -e "${YELLOW}2.${NC} Нет"
+    echo -e "${YELLOW}Введите номер (1-2):${NC}"
+    read -r ssl_choice
+    case $ssl_choice in
+        1) SSL_ENABLED="yes" ;;
+        2) SSL_ENABLED="no" ;;
+        *) log_message "error" "Неверный выбор для SSL. Допустимые значения: 1-2"; exit 1 ;;
+    esac
+    log_message "info" "Выпуск SSL: $SSL_ENABLED"
 
     SUCCESS_COUNT=0
     ERROR_COUNT=0
@@ -111,12 +98,12 @@ bulk_create_sites() {
     for i in "${!VALID_DOMAINS[@]}"; do
         domain="${VALID_DOMAINS[$i]}"
         original_domain="${ORIGINAL_DOMAINS[$i]}"
-        log_message "info" "Обработка домена $original_domain (Punycode: $domain) [$((i+1))/$VALID_DOMAINS_COUNT]"
-        if [ $SKIP_AVAILABILITY_CHECK -eq 0 ] && ! check_site_availability "$domain"; then
+        log_message "info" "Обработка домена $original_domain (Punycode: $domain)"
+        if ! check_site_exists "$domain"; then
             ((ERROR_COUNT++))
             continue
         fi
-        if ! check_site_exists "$domain"; then
+        if ! check_site_availability "$domain"; then
             ((ERROR_COUNT++))
             continue
         fi
@@ -308,10 +295,10 @@ bulk_create_sites() {
         fi
 
         if [ "$SSL_ENABLED" = "yes" ]; then
-            if setup_ssl "$domain" "$SSL_TYPE"; then
-                log_message "success" "SSL ($SSL_TYPE) установлен для $original_domain"
+            if setup_ssl "$domain"; then
+                log_message "success" "SSL установлен для $original_domain"
             else
-                log_message "warning" "Не удалось установить SSL ($SSL_TYPE) для $original_domain"
+                log_message "warning" "Не удалось установить SSL для $original_domain"
             fi
         fi
 
