@@ -7,14 +7,10 @@ install_stack() {
     welcome
     log_message "info" "Проверяем установку LEMP-стека..." "start_operation"
     init_credentials
-    if ! check_stack_installed; then
-        log_message "error" "Проверка LEMP-стека не удалась"
-        exit 1
-    fi
-    if [ $? -eq 0 ]; then
+    if check_stack_installed; then
         SUCCESS_COUNT=1
         ERROR_COUNT=0
-        log_message "info" "Установка стека завершена" "end_operation" "Установка стека завершена"
+        log_message "info" "LEMP-стек уже установлен" "end_operation" "Установка стека завершена"
         exit 0
     fi
     log_message "info" "Запускаем установку LEMP-стека..."
