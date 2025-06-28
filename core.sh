@@ -161,9 +161,13 @@ check_site_not_exists() {
 check_site_availability() {
     local domain=$1
     if curl -s https://$domain | grep -q "MiniStack CLI"; then
+        log_message "info" "Сайт $domain доступен по HTTPS"
+        return 0
+    elif curl -s http://$domain | grep -q "MiniStack CLI"; then
+        log_message "info" "Сайт $domain доступен по HTTP"
         return 0
     else
-        log_message "error" "Домен $domain не содержит MiniStack CLI"
+        log_message "error" "Сайт $domain недоступен ни по HTTPS, ни по HTTP"
         return 1
     fi
 }
