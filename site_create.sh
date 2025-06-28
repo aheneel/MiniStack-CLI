@@ -3,9 +3,9 @@
 
 create_site() {
     clean_old_logs
-    DOMAIN=$1
-    TYPE=$2
-    PHP_VERSION=$DEFAULT_PHP
+    DOMAIN="$1"
+    TYPE="$2"
+    PHP_VERSION="$DEFAULT_PHP"
     REDIRECT_MODE="none"
     SSL_TYPE=""
     SUCCESS_COUNT=0
@@ -30,19 +30,22 @@ create_site() {
     # Парсинг дополнительных аргументов
     shift 2
     VALID_FLAGS=("--php74" "--php80" "--php81" "--php82" "--php83" "--yes-www" "--no-www" "--ssl-lets" "--ssl-open")
-    for arg in "$@"; do
-        case "$arg" in
-            --php74) PHP_VERSION="7.4" ;;
-            --php80) PHP_VERSION="8.0" ;;
-            --php81) PHP_VERSION="8.1" ;;
-            --php82) PHP_VERSION="8.2" ;;
-            --php83) PHP_VERSION="8.3" ;;
-            --yes-www) REDIRECT_MODE="yes-www" ;;
-            --no-www) REDIRECT_MODE="no-www" ;;
-            --ssl-lets) SSL_TYPE="--letsencrypt" ;;
-            --ssl-open) SSL_TYPE="--selfsigned" ;;
-            *) log_message "warning" "Неверный аргумент: $arg. Игнорируем." ;;
-        esac
+    for arg; do
+        if [[ " ${VALID_FLAGS[*]} " =~ " $arg " ]]; then
+            case "$arg" in
+                --php74) PHP_VERSION="7.4" ;;
+                --php80) PHP_VERSION="8.0" ;;
+                --php81) PHP_VERSION="8.1" ;;
+                --php82) PHP_VERSION="8.2" ;;
+                --php83) PHP_VERSION="8.3" ;;
+                --yes-www) REDIRECT_MODE="yes-www" ;;
+                --no-www) REDIRECT_MODE="no-www" ;;
+                --ssl-lets) SSL_TYPE="--letsencrypt" ;;
+                --ssl-open) SSL_TYPE="--selfsigned" ;;
+            esac
+        else
+            log_message "warning" "Неверный аргумент: $arg. Игнорируем."
+        fi
     done
 
     ORIGINAL_DOMAIN="$DOMAIN"
