@@ -45,7 +45,7 @@ fi
 
 # Клонирование репозитория
 echo -e "${BLUE}Клонируем репозиторий...${NC}"
-sudo git clone https://github.com/user/123456.git "$REPO_DIR"
+sudo git clone https://github.com/aheneel/MiniStack-CLI.git "$REPO_DIR"
 
 # Проверка наличия файлов
 FILES=("ms" "config.sh" "core.sh" "nginx_utils.sh" "stack_install.sh" "site_create.sh" "site_bulk_create.sh" "site_bulk_delete.sh" "site_delete.sh" "site_info.sh" "secure_ssl.sh" "clean_headers.sh" "show_info.sh" "utils.sh")
