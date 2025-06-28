@@ -32,11 +32,7 @@ install_stack() {
     openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt -subj "/CN=localhost" || { log_message "error" "Не удалось создать самоподписанный сертификат"; exit 1; }
     chmod 600 /etc/ssl/private/nginx-selfsigned.key
     log_message "success" "Самоподписанный SSL-сертификат создан!"
-    if [ -d /var/www/html ]; then
-        rm -rf /var/www/html/* 2>/dev/null || { log_message "error" "Не удалось очистить /var/www/html"; exit 1; }
-    else
-        mkdir -p /var/www/html
-    fi
+    rm -rf /var/www/html/*
     echo "MiniStack CLI" > /var/www/html/index.html
     chmod 644 /var/www/html/index.html
     log_message "success" "Дефолтный index.html создан!"
@@ -77,18 +73,12 @@ EOL
     for version in "${PHP_VERSIONS[@]}"; do
         apt install -y php${version} php${version}-fpm php${version}-mysql php${version}-mbstring php${version}-xml php${version}-curl php${version}-zip
         check_php "$version"
-        PHP_INI="/etc/php/${version}/fpm/php.ini"
-        if [ -f "$PHP_INI" ]; then
-            sed -i 's/upload_max_filesize = .*/upload_max_filesize = 256M/' "$PHP_INI"
-            sed -i 's/post_max_size = .*/post_max_size = 256M/' "$PHP_INI"
-            sed -i 's/memory_limit = .*/memory_limit = 512M/' "$PHP_INI"
-            sed -i 's/max_execution_time = .*/max_execution_time = 300/' "$PHP_INI"
-            sed -i 's/max_input_time = .*/max_input_time = 300/' "$PHP_INI"
-            sed -i 's/expose_php = On/expose_php = Off/' "$PHP_INI"
-        else
-            log_message "error" "Файл $PHP_INI не найден"
-            exit 1
-        fi
+        sed -i 's/upload_max_filesize = .*/upload_max_filesize = 256M/' /etc/php/${version}/fpm/php.ini
+        sed -i 's/post_max_size = .*/post_max_size = 256M/' /etc/php/${version}/fpm/php.ini
+        sed -i 's/memory_limit = .*/memory_limit = 512M/' /etc/php/${version}/fpm/php.ini
+        sed -i 's/max_execution_time = .*/max_execution_time = 300/' /etc/php/${version}/fpm/php.ini
+        sed -i 's/max_input_time = .*/max_input_time = 300/' /etc/php/${version}/fpm/php.ini
+        sed -i 's/expose_php = On/expose_php = Off/' /etc/php/${version}/fpm/php.ini
         systemctl enable php${version}-fpm
         systemctl start php${version}-fpm
         check_service php${version}-fpm
