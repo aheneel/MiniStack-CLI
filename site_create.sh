@@ -13,7 +13,7 @@ create_site() {
 
     # Проверка корректности домена и типа сайта
     if [ -z "$DOMAIN" ] || [ -z "$TYPE" ]; then
-        log_message "error" "Укажите домен и тип сайта, например: sudo ms site create example.com --html [--php74|--php80|--php81|--php82|--php83] [--yes-www|--no-www] [--ssl-lets|--ssl-open]"
+        log_message "error" "Укажите домен и тип сайта, например: sudo ms site --create example.com --html [--php74|--php80|--php81|--php82|--php83] [--yes-www|--no-www] [--ssl-lets|--ssl-open]"
         exit 1
     fi
 
@@ -27,25 +27,29 @@ create_site() {
         exit 1
     fi
 
-    # Парсинг дополнительных аргументов
+    # Проверка всех флагов на валидность
     shift 2
     VALID_FLAGS=("--php74" "--php80" "--php81" "--php82" "--php83" "--yes-www" "--no-www" "--ssl-lets" "--ssl-open")
-    for arg; do
-        if [[ " ${VALID_FLAGS[*]} " =~ " $arg " ]]; then
-            case "$arg" in
-                --php74) PHP_VERSION="7.4" ;;
-                --php80) PHP_VERSION="8.0" ;;
-                --php81) PHP_VERSION="8.1" ;;
-                --php82) PHP_VERSION="8.2" ;;
-                --php83) PHP_VERSION="8.3" ;;
-                --yes-www) REDIRECT_MODE="yes-www" ;;
-                --no-www) REDIRECT_MODE="no-www" ;;
-                --ssl-lets) SSL_TYPE="--letsencrypt" ;;
-                --ssl-open) SSL_TYPE="--selfsigned" ;;
-            esac
-        else
-            log_message "warning" "Неверный аргумент: $arg. Игнорируем."
+    for arg in "$@"; do
+        if [[ ! " ${VALID_FLAGS[*]} " =~ " $arg " ]]; then
+            log_message "error" "Неверный аргумент: $arg. Допустимые флаги: ${VALID_FLAGS[*]}"
+            exit 1
         fi
+    done
+
+    # Парсинг дополнительных аргументов
+    for arg in "$@"; do
+        case "$arg" in
+            --php74) PHP_VERSION="7.4" ;;
+            --php80) PHP_VERSION="8.0" ;;
+            --php81) PHP_VERSION="8.1" ;;
+            --php82) PHP_VERSION="8.2" ;;
+            --php83) PHP_VERSION="8.3" ;;
+            --yes-www) REDIRECT_MODE="yes-www" ;;
+            --no-www) REDIRECT_MODE="no-www" ;;
+            --ssl-lets) SSL_TYPE="--letsencrypt" ;;
+            --ssl-open) SSL_TYPE="--selfsigned" ;;
+        esac
     done
 
     ORIGINAL_DOMAIN="$DOMAIN"
