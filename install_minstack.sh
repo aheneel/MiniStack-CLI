@@ -34,6 +34,13 @@ if ! command -v curl >/dev/null 2>&1; then
     sudo apt install -y curl
 fi
 
+# Установка dos2unix для конвертации CRLF в LF
+if ! command -v dos2unix >/dev/null 2>&1; then
+    echo -e "${BLUE}Устанавливаем dos2unix...${NC}"
+    sudo apt update
+    sudo apt install -y dos2unix
+fi
+
 # Директория для клонирования
 REPO_DIR="/root/MiniStack-CLI"
 
@@ -54,6 +61,15 @@ for file in "${FILES[@]}"; do
         echo -e "${RED}Ошибка: файл $file не найден в репозитории${NC}"
         sudo rm -rf "$REPO_DIR"
         exit 1
+    fi
+done
+
+# Конвертация CRLF в LF
+for file in "${FILES[@]}"; do
+    if command -v dos2unix >/dev/null 2>&1; then
+        sudo dos2unix "$REPO_DIR/$file" >/dev/null 2>&1
+    else
+        sudo sed -i 's/\r$//' "$REPO_DIR/$file"
     fi
 done
 
@@ -82,6 +98,13 @@ sudo cp "$REPO_DIR/utils.sh" /usr/local/lib/minStack/utils.sh
 echo -e "${BLUE}Настраиваем права доступа...${NC}"
 sudo chmod +x /usr/local/bin/ms
 sudo chmod 644 /usr/local/lib/minStack/*.sh
+
+# Проверка синтаксиса главного файла
+if ! bash -n /usr/local/bin/ms; then
+    echo -e "${RED}Ошибка: синтаксическая ошибка в /usr/local/bin/ms${NC}"
+    sudo rm -rf "$REPO_DIR"
+    exit 1
+fi
 
 # Запуск установки стека
 echo -e "${BLUE}Запускаем установку LEMP-стека...${NC}"
