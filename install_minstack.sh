@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # install_minstack.sh - Установка MiniStack CLI из GitHub репозитория
-# Устанавливает файлы, исправляет окончания строк, проверяет синтаксис, запускает sudo ms stack install и удаляет /root/MiniStack-CLI
+# Устанавливает файлы, запускает sudo ms stack install и удаляет /root/MiniStack-CLI
 # Версия 1.0.31
 
 set -e
@@ -34,13 +34,6 @@ if ! command -v curl >/dev/null 2>&1; then
     sudo apt install -y curl
 fi
 
-# Проверка наличия dos2unix
-if ! command -v dos2unix >/dev/null 2>&1; then
-    echo -e "${RED}dos2unix не установлен. Устанавливаем...${NC}"
-    sudo apt update
-    sudo apt install -y dos2unix
-fi
-
 # Директория для клонирования
 REPO_DIR="/root/MiniStack-CLI"
 
@@ -52,21 +45,13 @@ fi
 
 # Клонирование репозитория
 echo -e "${BLUE}Клонируем репозиторий...${NC}"
-sudo git clone https://github.com/aheneel/MiniStack-CLI.git "$REPO_DIR"
+sudo git clone https://github.com/user/123456.git "$REPO_DIR"
 
-# Проверка наличия файлов и синтаксиса, конвертация CRLF в LF
+# Проверка наличия файлов
 FILES=("ms" "config.sh" "core.sh" "nginx_utils.sh" "stack_install.sh" "site_create.sh" "site_bulk_create.sh" "site_bulk_delete.sh" "site_delete.sh" "site_info.sh" "secure_ssl.sh" "clean_headers.sh" "show_info.sh" "utils.sh")
 for file in "${FILES[@]}"; do
     if [ ! -f "$REPO_DIR/$file" ]; then
         echo -e "${RED}Ошибка: файл $file не найден в репозитории${NC}"
-        sudo rm -rf "$REPO_DIR"
-        exit 1
-    fi
-    # Конвертация CRLF в LF
-    sudo dos2unix "$REPO_DIR/$file" >/dev/null 2>&1
-    # Проверка синтаксиса
-    if ! bash -n "$REPO_DIR/$file"; then
-        echo -e "${RED}Ошибка: синтаксическая ошибка в файле $file${NC}"
         sudo rm -rf "$REPO_DIR"
         exit 1
     fi
