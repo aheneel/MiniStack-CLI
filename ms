@@ -37,35 +37,59 @@ done
 case "$1" in
     stack)
         case "$2" in
-            install) install_stack ;;
-            *) log_message "error" "Укажите 'install' для команды stack"; show_help ;;
+            --install) install_stack ;;
+            *) log_message "error" "Укажите --install для команды stack"; exit 1 ;;
         esac
         ;;
     site)
         case "$2" in
-            create) create_site "$3" "$4" "$5" "$6" "$7" ;;
-            bulk) bulk_create_sites ;;
-            bulk-delete) bulk_delete_sites ;;
-            delete) delete_site "$3" ;;
-            info) site_info "$3" ;;
-            *) log_message "error" "Укажите 'create', 'bulk', 'bulk-delete', 'delete' или 'info'"; show_help ;;
+            --create)
+                if [ -z "$3" ]; then
+                    log_message "error" "Укажите домен после --create"
+                    exit 1
+                else
+                    shift 2
+                    create_site "$@"
+                fi
+                ;;
+            --bulk) bulk_create_sites ;;
+            --bulk-delete) bulk_delete_sites ;;
+            --delete)
+                if [ -z "$3" ]; then
+                    log_message "error" "Укажите домен после --delete"
+                    exit 1
+                fi
+                delete_site "$3"
+                ;;
+            --info)
+                if [ -z "$3" ]; then
+                    log_message "error" "Укажите домен после --info"
+                    exit 1
+                fi
+                site_info "$3"
+                ;;
+            *) log_message "error" "Укажите --create, --bulk, --bulk-delete, --delete или --info"; exit 1 ;;
         esac
         ;;
     secure)
         if [ "$2" = "--ssl" ]; then
+            if [ -z "$3" ]; then
+                log_message "error" "Укажите домен после --ssl"
+                exit 1
+            fi
             if [[ "$4" == "--letsencrypt" || "$4" == "--selfsigned" || -z "$4" ]]; then
                 setup_ssl "$3" "$4"
             else
                 log_message "error" "Неверный флаг для secure --ssl: $4. Используйте --letsencrypt или --selfsigned"
-                show_help
+                exit 1
             fi
         else
             log_message "error" "Укажите --ssl и домен"
-            show_help
+            exit 1
         fi
         ;;
-    clean) clean_headers ;;
-    info) show_info ;;
-    help|--help|-h) show_help ;;
-    *) log_message "error" "Неизвестная команда"; show_help ;;
+    --clean) clean_headers ;;
+    --info) show_info ;;
+    --help) show_help ;;
+    *) log_message "error" "Неизвестная команда: $1"; exit 1 ;;
 esac
