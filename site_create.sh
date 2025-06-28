@@ -10,9 +10,24 @@ create_site() {
     SUCCESS_COUNT=0
     ERROR_COUNT=0
 
-    # Проверка корректности аргументов
-    if [ -z "$DOMAIN" ] || [ -z "$TYPE" ]; then
-        log_message "error" "Укажите домен и тип сайта, например: sudo ms site create example.com --html [--php74|--php80|--php81|--php82|--php83] [--yes-www|--no-www]"
+    # Парсинг аргументов
+    shift 2
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --php74) PHP_VERSION="7.4" ;;
+            --php80) PHP_VERSION="8.0" ;;
+            --php81) PHP_VERSION="8.1" ;;
+            --php82) PHP_VERSION="8.2" ;;
+            --php83) PHP_VERSION="8.3" ;;
+            --yes-www) REDIRECT_MODE="yes-www" ;;
+            --no-www) REDIRECT_MODE="no-www" ;;
+            *) log_message "error" "Неверный аргумент: $1"; show_help ;;
+        esac
+        shift
+    done
+
+    if [ -z "$DOMAIN" ]; then
+        log_message "error" "Укажите домен, например: sudo ms site create example.com --html"
         exit 1
     fi
 
@@ -21,29 +36,10 @@ create_site() {
         exit 1
     fi
 
-    if [[ "$TYPE" != "--html" && "$TYPE" != "--php" && "$TYPE" != "--wp" ]]; then
-        log_message "error" "Неверный тип сайта: $TYPE. Используйте --html, --php или --wp"
-        exit 1
-    fi
-
-    # Парсинг дополнительных аргументов
-    shift 2
-    VALID_FLAGS=("--php74" "--php80" "--php81" "--php82" "--php83" "--yes-www" "--no-www")
-    for arg in "$@"; do
-        if [[ ! " ${VALID_FLAGS[*]} " =~ " $arg " ]]; then
-            log_message "error" "Неверный аргумент: $arg. Допустимые флаги: ${VALID_FLAGS[*]}"
-            exit 1
-        fi
-        case "$arg" in
-            --php74) PHP_VERSION="7.4" ;;
-            --php80) PHP_VERSION="8.0" ;;
-            --php81) PHP_VERSION="8.1" ;;
-            --php82) PHP_VERSION="8.2" ;;
-            --php83) PHP_VERSION="8.3" ;;
-            --yes-www) REDIRECT_MODE="yes-www" ;;
-            --no-www) REDIRECT_MODE="no-www" ;;
-        esac
-    done
+    case $TYPE in
+        --html|--php|--wp) ;;
+        *) log_message "error" "Укажите тип сайта (--html, --php, --wp)"; exit 1 ;;
+    esac
 
     ORIGINAL_DOMAIN="$DOMAIN"
     DOMAIN=$(convert_to_punycode "$DOMAIN")
