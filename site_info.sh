@@ -3,9 +3,17 @@
 
 site_info() {
     clean_old_logs
-    DOMAIN=$1
+    DOMAIN="$1"
     if [ -z "$DOMAIN" ]; then
-        log_message "error" "Укажите домен, например: sudo ms site info example.com"
+        log_message "error" "Укажите домен после --info, например: sudo ms site --info example.com"
+        exit 1
+    fi
+    if ! echo "$DOMAIN" | grep -qE '^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'; then
+        log_message "error" "Невалидный домен: $DOMAIN. Домен должен содержать точку"
+        exit 1
+    fi
+    if [ $# -gt 1 ]; then
+        log_message "error" "Неверные аргументы для --info: ${@:2}. Используйте только домен"
         exit 1
     fi
     ORIGINAL_DOMAIN="$DOMAIN"
