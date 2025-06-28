@@ -19,7 +19,7 @@ show_help() {
     log_message "info" "4. sudo ms site bulk-delete - Массовое удаление сайтов"
     log_message "info" "5. sudo ms site delete <domain> - Удалить сайт"
     log_message "info" "6. sudo ms site info <domain> - Показать информацию о сайте"
-    log_message "info" "7. sudo ms secure --ssl <domain> - Настроить SSL"
+    log_message "info" "7. sudo ms secure --ssl <domain> [--letsencrypt|--selfsigned] - Настроить SSL (по умолчанию --letsencrypt)"
     log_message "info" "8. sudo ms clean - Удалить лишние HTTP-заголовки"
     log_message "info" "9. sudo ms info - Показать статус сервисов"
     log_message "info" "10. sudo ms help - Показать справку"
