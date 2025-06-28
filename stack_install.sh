@@ -4,6 +4,10 @@
 install_stack() {
     . /usr/local/lib/minStack/utils.sh
     clean_old_logs
+    if [ $# -gt 0 ]; then
+        log_message "error" "Неверные аргументы для --install: $@. Используйте без флагов"
+        exit 1
+    fi
     welcome
     log_message "info" "Проверяем установку LEMP-стека..." "start_operation"
     init_credentials
