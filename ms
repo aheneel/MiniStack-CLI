@@ -1,4 +1,3 @@
-#!/bin/bash
 # ms - Точка входа для MiniStack CLI
 # Версия 1.0.31
 
@@ -37,7 +36,21 @@ case "$1" in
         ;;
     site)
         case "$2" in
-            create) create_site "$3" "$4" "$5" "$6" ;;
+            create)
+                shift 2
+                if [ $# -lt 2 ]; then
+                    log_message "error" "Укажите домен и тип сайта, например: sudo ms site create example.com --html"
+                    show_help
+                    exit 1
+                fi
+                VALID_FLAGS=("--html" "--php" "--wp" "--php74" "--php80" "--php81" "--php82" "--php83" "--yes-www" "--no-www" "--ssl-lets" "--ssl-open")
+                for arg in "$@"; do
+                    if [[ ! " ${VALID_FLAGS[*]} " =~ " $arg " && "$arg" != "$1" ]]; then
+                        log_message "warning" "Неверный аргумент: $arg. Игнорируем."
+                    fi
+                done
+                create_site "$@"
+                ;;
             bulk) bulk_create_sites ;;
             bulk-delete) bulk_delete_sites ;;
             delete) delete_site "$3" ;;
