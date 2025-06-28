@@ -3,6 +3,10 @@
 
 bulk_delete_sites() {
     clean_old_logs
+    if [ $# -gt 0 ]; then
+        log_message "error" "Неверные аргументы для --bulk-delete: $@. Используйте без флагов"
+        exit 1
+    fi
     log_message "info" "Запускаем массовое удаление сайтов..." "start_operation"
     echo -e "${YELLOW}Введите домены (по одному на строку, без http:// или /, например: domain.com). Для завершения введите 'done':${NC}"
     declare -a INPUT_DOMAINS
