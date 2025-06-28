@@ -32,8 +32,8 @@ install_stack() {
     openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt -subj "/CN=localhost" || { log_message "error" "Не удалось создать самоподписанный сертификат"; exit 1; }
     chmod 600 /etc/ssl/private/nginx-selfsigned.key
     log_message "success" "Самоподписанный SSL-сертификат создан!"
-    if [ -d "/var/www/html" ]; then
-        rm -rf /var/www/html/*
+    if [ -d /var/www/html ]; then
+        rm -rf /var/www/html/* 2>/dev/null || { log_message "error" "Не удалось очистить /var/www/html"; exit 1; }
     else
         mkdir -p /var/www/html
     fi
@@ -85,7 +85,6 @@ EOL
             sed -i 's/max_execution_time = .*/max_execution_time = 300/' "$PHP_INI"
             sed -i 's/max_input_time = .*/max_input_time = 300/' "$PHP_INI"
             sed -i 's/expose_php = On/expose_php = Off/' "$PHP_INI"
-            log_message "success" "PHP $version: php.ini настроен"
         else
             log_message "error" "Файл $PHP_INI не найден"
             exit 1
