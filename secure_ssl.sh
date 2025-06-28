@@ -3,12 +3,20 @@
 
 setup_ssl() {
     clean_old_logs
-    DOMAIN=$1
-    CERT_TYPE=$2
+    DOMAIN="$1"
+    CERT_TYPE="$2"
     SUCCESS_COUNT=0
     ERROR_COUNT=0
     if [ -z "$DOMAIN" ]; then
-        log_message "error" "Укажите домен, например: sudo ms secure --ssl example.com [--letsencrypt|--selfsigned]"
+        log_message "error" "Укажите домен после --ssl, например: sudo ms secure --ssl example.com [--letsencrypt|--selfsigned]"
+        exit 1
+    fi
+    if ! echo "$DOMAIN" | grep -qE '^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'; then
+        log_message "error" "Невалидный домен: $DOMAIN. Домен должен содержать точку"
+        exit 1
+    fi
+    if [ $# -gt 2 ]; then
+        log_message "error" "Неверные аргументы для --ssl: ${@:3}. Используйте --letsencrypt или --selfsigned"
         exit 1
     fi
     if [ -z "$CERT_TYPE" ]; then
