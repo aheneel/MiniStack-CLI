@@ -14,7 +14,7 @@ show_help() {
     log_message "info" "Использование: sudo ms <команда> [аргументы]"
     log_message "info" "Команды:"
     log_message "info" "1. sudo ms stack install - Установить LEMP-стек"
-    log_message "info" "2. sudo ms site create <domain> [--html|--php|--wp] [--php74|--php80|--php81|--php82|--php83] [--yes-www|--no-www] - Создать сайт"
+    log_message "info" "2. sudo ms site create <domain> [--html|--php|--wp] [--php74|--php80|--php81|--php82|--php83] [--yes-www|--no-www] [--ssl-lets|--ssl-open] - Создать сайт"
     log_message "info" "3. sudo ms site bulk - Массовый деплой сайтов"
     log_message "info" "4. sudo ms site bulk-delete - Массовое удаление сайтов"
     log_message "info" "5. sudo ms site delete <domain> - Удалить сайт"
