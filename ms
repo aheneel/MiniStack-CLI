@@ -1,5 +1,12 @@
+#!/bin/bash
 # ms - Точка входа для MiniStack CLI
 # Версия 1.0.31
+
+# Проверка, что используется bash
+if [ -z "$BASH_VERSION" ]; then
+    echo "ERROR: Скрипт должен выполняться в Bash, а не в sh"
+    exit 1
+fi
 
 # Проверка наличия файлов перед их подключением
 LIB_DIR="/usr/local/lib/minStack"
@@ -12,19 +19,19 @@ for file in "${FILES[@]}"; do
     fi
 done
 
-. /usr/local/lib/minStack/config.sh
-. /usr/local/lib/minStack/core.sh
-. /usr/local/lib/minStack/nginx_utils.sh
-. /usr/local/lib/minStack/utils.sh
-. /usr/local/lib/minStack/stack_install.sh
-. /usr/local/lib/minStack/site_create.sh
-. /usr/local/lib/minStack/site_bulk_create.sh
-. /usr/local/lib/minStack/site_bulk_delete.sh
-. /usr/local/lib/minStack/site_delete.sh
-. /usr/local/lib/minStack/site_info.sh
-. /usr/local/lib/minStack/secure_ssl.sh
-. /usr/local/lib/minStack/clean_headers.sh
-. /usr/local/lib/minStack/show_info.sh
+. "$LIB_DIR/config.sh"
+. "$LIB_DIR/core.sh"
+. "$LIB_DIR/nginx_utils.sh"
+. "$LIB_DIR/utils.sh"
+. "$LIB_DIR/stack_install.sh"
+. "$LIB_DIR/site_create.sh"
+. "$LIB_DIR/site_bulk_create.sh"
+. "$LIB_DIR/site_bulk_delete.sh"
+. "$LIB_DIR/site_delete.sh"
+. "$LIB_DIR/site_info.sh"
+. "$LIB_DIR/secure_ssl.sh"
+. "$LIB_DIR/clean_headers.sh"
+. "$LIB_DIR/show_info.sh"
 
 # Парсинг команд
 case "$1" in
