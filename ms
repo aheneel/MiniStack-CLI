@@ -1,4 +1,3 @@
-#!/bin/bash
 # ms - Точка входа для MiniStack CLI
 # Версия 1.0.31
 
@@ -36,7 +35,12 @@ case "$1" in
         ;;
     secure)
         if [ "$2" = "--ssl" ]; then
-            setup_ssl "$3"
+            if [[ "$4" == "--letsencrypt" || "$4" == "--selfsigned" || -z "$4" ]]; then
+                setup_ssl "$3" "$4"
+            else
+                log_message "error" "Неверный флаг для secure --ssl: $4. Используйте --letsencrypt или --selfsigned"
+                show_help
+            fi
         else
             log_message "error" "Укажите --ssl и домен"
             show_help
