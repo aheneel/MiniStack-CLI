@@ -34,6 +34,13 @@ if ! command -v curl >/dev/null 2>&1; then
     sudo apt install -y curl
 fi
 
+# Проверка наличия bash
+if ! command -v bash >/dev/null 2>&1; then
+    echo -e "${RED}Bash не установлен. Устанавливаем...${NC}"
+    sudo apt update
+    sudo apt install -y bash
+fi
+
 # Установка dos2unix для конвертации CRLF в LF
 if ! command -v dos2unix >/dev/null 2>&1; then
     echo -e "${BLUE}Устанавливаем dos2unix...${NC}"
@@ -65,6 +72,7 @@ for file in "${FILES[@]}"; do
 done
 
 # Конвертация CRLF в LF
+echo -e "${BLUE}Конвертируем файлы в формат LF...${NC}"
 for file in "${FILES[@]}"; do
     if command -v dos2unix >/dev/null 2>&1; then
         sudo dos2unix "$REPO_DIR/$file" >/dev/null 2>&1
@@ -94,10 +102,24 @@ sudo cp "$REPO_DIR/clean_headers.sh" /usr/local/lib/minStack/clean_headers.sh
 sudo cp "$REPO_DIR/show_info.sh" /usr/local/lib/minStack/show_info.sh
 sudo cp "$REPO_DIR/utils.sh" /usr/local/lib/minStack/utils.sh
 
+# Проверка, что ms скопировался
+if [ ! -f "/usr/local/bin/ms" ]; then
+    echo -e "${RED}Ошибка: файл /usr/local/bin/ms не скопировался${NC}"
+    sudo rm -rf "$REPO_DIR"
+    exit 1
+fi
+
 # Установка прав
 echo -e "${BLUE}Настраиваем права доступа...${NC}"
 sudo chmod +x /usr/local/bin/ms
 sudo chmod 644 /usr/local/lib/minStack/*.sh
+
+# Проверка прав на ms
+if [ ! -x "/usr/local/bin/ms" ]; then
+    echo -e "${RED}Ошибка: файл /usr/local/bin/ms не имеет прав на выполнение${NC}"
+    sudo rm -rf "$REPO_DIR"
+    exit 1
+fi
 
 # Проверка синтаксиса главного файла
 if ! bash -n /usr/local/bin/ms; then
@@ -106,9 +128,16 @@ if ! bash -n /usr/local/bin/ms; then
     exit 1
 fi
 
+# Пауза для избежания кэширования
+sleep 1
+
 # Запуск установки стека
 echo -e "${BLUE}Запускаем установку LEMP-стека...${NC}"
-sudo ms stack install
+if ! sudo /usr/local/bin/ms stack install; then
+    echo -e "${RED}Ошибка: не удалось выполнить sudo ms stack install${NC}"
+    sudo rm -rf "$REPO_DIR"
+    exit 1
+fi
 
 # Удаление папки репозитория
 echo -e "${BLUE}Удаляем папку $REPO_DIR...${NC}"
