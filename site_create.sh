@@ -37,6 +37,26 @@ create_site() {
         fi
     done
 
+    ORIGINAL_DOMAIN="$DOMAIN"
+    DOMAIN=$(convert_to_punycode "$DOMAIN")
+
+    # Проверка существования сайта
+    if [ -f "/etc/nginx/sites-available/$DOMAIN" ] || [ -d "/var/www/$DOMAIN" ] || grep -q "Site: $ORIGINAL_DOMAIN" "$SITE_CREDENTIALS"; then
+        log_message "error" "Сайт $ORIGINAL_DOMAIN уже существует"
+        exit 1
+    fi
+
+    log_message "info" "Создаём сайт $ORIGINAL_DOMAIN (Punycode: $DOMAIN)..." "start_operation"
+    if ! check_site_availability "$DOMAIN"; then
+        ERROR_COUNT=1
+        log_message "info" "Создание сайта завершено" "end_operation" "Создание сайта завершено"
+        exit 1
+    fi
+
+    WEB_ROOT="/var/www/$DOMAIN/html"
+    CONFIG_FILE="/etc/nginx/sites-available/$DOMAIN"
+    ENABLED_FILE="/etc/nginx/sites-enabled/$DOMAIN"
+
     # Парсинг дополнительных аргументов
     for arg in "$@"; do
         case "$arg" in
@@ -51,24 +71,6 @@ create_site() {
             --ssl-open) SSL_TYPE="--selfsigned" ;;
         esac
     done
-
-    ORIGINAL_DOMAIN="$DOMAIN"
-    DOMAIN=$(convert_to_punycode "$DOMAIN")
-    log_message "info" "Создаём сайт $ORIGINAL_DOMAIN (Punycode: $DOMAIN)..." "start_operation"
-    if ! check_site_availability "$DOMAIN"; then
-        ERROR_COUNT=1
-        log_message "info" "Создание сайта завершено" "end_operation" "Создание сайта завершено"
-        exit 1
-    fi
-    if ! check_site_exists "$DOMAIN"; then
-        ERROR_COUNT=1
-        log_message "info" "Создание сайта завершено" "end_operation" "Создание сайта завершено"
-        exit 1
-    fi
-
-    WEB_ROOT="/var/www/$DOMAIN/html"
-    CONFIG_FILE="/etc/nginx/sites-available/$DOMAIN"
-    ENABLED_FILE="/etc/nginx/sites-enabled/$DOMAIN"
 
     mkdir -p "$WEB_ROOT"
     chown -R www-data:www-data "$WEB_ROOT"
