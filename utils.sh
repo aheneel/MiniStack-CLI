@@ -10,22 +10,26 @@ welcome() {
 
 show_help() {
     clean_old_logs
-    log_message "info" "MiniStack CLI v$VERSION - Справка" "start_operation"
-    log_message "info" "Использование: sudo ms <команда> [аргументы]"
-    log_message "info" "Команды:"
-    log_message "info" "1. sudo ms stack --install - Установить LEMP-стек"
-    log_message "info" "2. sudo ms site --create <domain> [--html|--php|--wp] [--php74|--php80|--php81|--php82|--php83] [--yes-www|--no-www] [--ssl-lets|--ssl-open] - Создать сайт"
-    log_message "info" "3. sudo ms site --bulk - Массовый деплой сайтов"
-    log_message "info" "4. sudo ms site --bulk-delete - Массовое удаление сайтов"
-    log_message "info" "5. sudo ms site --delete <domain> - Удалить сайт"
-    log_message "info" "6. sudo ms site --info <domain> - Показать информацию о сайте"
-    log_message "info" "7. sudo ms secure --ssl <domain> [--letsencrypt|--selfsigned] - Настроить SSL (по умолчанию --letsencrypt)"
-    log_message "info" "8. sudo ms --clean - Удалить лишние HTTP-заголовки"
-    log_message "info" "9. sudo ms --info - Показать статус сервисов"
-    log_message "info" "10. sudo ms --help - Показать справку"
-    log_message "info" "Логи: $LOG_FILE"
-    log_message "info" "Учетные данные: $CREDENTIALS_DIR"
-    log_message "info" "Справка завершена" "end_operation" "Справка завершена"
+    BOLD='\033[1m'
+    echo -e "${BLUE}=== MiniStack CLI v$VERSION ===${NC}"
+    echo -e "${YELLOW}Использование:${NC} sudo ms <команда> [аргументы]\n"
+    echo -e "${GREEN}Команды:${NC}"
+    echo -e "  ${BOLD}${YELLOW}sudo ms stack --install${NC}          Установить LEMP-стек (Nginx, PHP, MariaDB)"
+    echo -e "  ${BOLD}${YELLOW}sudo ms site --create <domain> [--html|--php|--wp] [--php74|--php80|--php81|--php82|--php83] [--yes-www|--no-www] [--ssl-lets|--ssl-open]${NC}"
+    echo -e "                                   Создать сайт (дефолт: PHP 7.4, без редиректа, без SSL)"
+    echo -e "  ${BOLD}${YELLOW}sudo ms site --bulk${NC}              Массовый деплой сайтов (интерактивный ввод)"
+    echo -e "  ${BOLD}${YELLOW}sudo ms site --bulk-delete${NC}       Массовое удаление сайтов (интерактивный ввод)"
+    echo -e "  ${BOLD}${YELLOW}sudo ms site --delete <domain>${NC}   Удалить сайт"
+    echo -e "  ${BOLD}${YELLOW}sudo ms site --info <domain>${NC}     Показать информацию о сайте"
+    echo -e "  ${BOLD}${YELLOW}sudo ms secure --ssl <domain> [--letsencrypt|--selfsigned]${NC}"
+    echo -e "                                   Настроить SSL (по умолчанию --letsencrypt)"
+    echo -e "  ${BOLD}${YELLOW}sudo ms --clean${NC}                  Удалить лишние HTTP-заголовки"
+    echo -e "  ${BOLD}${YELLOW}sudo ms --info${NC}                   Показать статус сервисов"
+    echo -e "  ${BOLD}${YELLOW}sudo ms --help${NC}                   Показать эту справку"
+    echo -e "\n${GREEN}Дополнительно:${NC}"
+    echo -e "  ${YELLOW}Логи:${NC} $LOG_FILE"
+    echo -e "  ${YELLOW}Учетные данные:${NC} $CREDENTIALS_DIR"
+    echo -e "${BLUE}=======================${NC}"
 }
 
 setup_php_repository() {
