@@ -142,7 +142,7 @@ get_db_root_pass() {
 
 check_site_exists() {
     local domain=$1
-    if [ -f "/etc/nginx/sites-available/$domain" ] || [ -d "/var/www/$domain" ]; then
+    if [ -f "/etc/nginx/sites-available/$domain" ] || [ -d "/var/www/$domain" ] || grep -q "Site: $domain" "$SITE_CREDENTIALS"; then
         log_message "error" "Сайт $domain уже существует"
         return 1
     fi
@@ -151,7 +151,7 @@ check_site_exists() {
 
 check_site_not_exists() {
     local domain=$1
-    if [ ! -f "/etc/nginx/sites-available/$domain" ] && [ ! -d "/var/www/$domain" ]; then
+    if [ ! -f "/etc/nginx/sites-available/$domain" ] && [ ! -d "/var/www/$domain" ] && ! grep -q "Site: $domain" "$SITE_CREDENTIALS"; then
         log_message "error" "Домен $domain уже удалён"
         return 1
     fi
