@@ -117,11 +117,12 @@ bulk_create_sites() {
         domain="${VALID_DOMAINS[$i]}"
         original_domain="${ORIGINAL_DOMAINS[$i]}"
         log_message "info" "Обработка домена $original_domain (Punycode: $domain) [$((i+1))/$VALID_DOMAINS_COUNT]"
-        if [ $SKIP_AVAILABILITY_CHECK -eq 0 ] && ! check_site_availability "$domain"; then
+        if [ -f "/etc/nginx/sites-available/$domain" ] || [ -d "/var/www/$domain" ] || grep -q "Site: $original_domain" "$SITE_CREDENTIALS"; then
+            log_message "error" "Сайт $original_domain уже существует"
             ((ERROR_COUNT++))
             continue
         fi
-        if ! check_site_exists "$domain"; then
+        if [ $SKIP_AVAILABILITY_CHECK -eq 0 ] && ! check_site_availability "$domain"; then
             ((ERROR_COUNT++))
             continue
         fi
@@ -301,6 +302,14 @@ bulk_create_sites() {
         systemctl restart nginx
         check_service nginx
 
+        if [ "$SSL_ENABLED" = "yes" ]; then
+            if setup_ssl "$domain" "$SSL_TYPE"; then
+                log_message "success" "SSL ($SSL_TYPE) установлен для $original_domain"
+            else
+                log_message "warning" "Не удалось установить SSL ($SSL_TYPE) для $original_domain"
+            fi
+        fi
+
         if curl -I "http://$domain" >/dev/null 2>&1; then
             log_message "success" "Сайт $original_domain успешно создан и доступен"
         else
@@ -310,14 +319,6 @@ bulk_create_sites() {
         if [ "$SITE_TYPE" != "--wp" ]; then
             log_message "success" "Домен успешно создан $original_domain"
             log_message "success" "Сайт $original_domain успешно создан и доступен"
-        fi
-
-        if [ "$SSL_ENABLED" = "yes" ]; then
-            if setup_ssl "$domain" "$SSL_TYPE"; then
-                log_message "success" "SSL ($SSL_TYPE) установлен для $original_domain"
-            else
-                log_message "warning" "Не удалось установить SSL ($SSL_TYPE) для $original_domain"
-            fi
         fi
 
         ((SUCCESS_COUNT++))
